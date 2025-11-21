@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { FaceShape } from '@/lib/analysis/faceShape';
 import { GoldenRatioResult } from '@/lib/analysis/goldenRatio';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, query, orderBy, limit, onSnapshot, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, query, orderBy, limit, onSnapshot, Timestamp, where } from 'firebase/firestore';
 
 export interface HistoryItem {
     id: string;
@@ -11,16 +11,24 @@ export interface HistoryItem {
     score: number;
     ratios: GoldenRatioResult['ratios'];
     type: 'camera' | 'upload' | 'manual';
+    userId?: string;
 }
 
-export const useHistory = () => {
+export const useHistory = (userId?: string) => {
     const [history, setHistory] = useState<HistoryItem[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Subscribe to real-time updates
+        if (!userId) {
+            setHistory([]);
+            setLoading(false);
+            return;
+        }
+
+        // Subscribe to real-time updates for specific user
         const q = query(
             collection(db, 'history'),
+            where('userId', '==', userId),
             orderBy('timestamp', 'desc'),
             limit(50)
         );
@@ -36,6 +44,7 @@ export const useHistory = () => {
                     score: data.score,
                     ratios: data.ratios,
                     type: data.type,
+                    userId: data.userId,
                 });
             });
             setHistory(items);
@@ -46,12 +55,15 @@ export const useHistory = () => {
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [userId]);
 
     const addToHistory = async (item: Omit<HistoryItem, 'id' | 'date'>) => {
+        if (!userId) return; // Don't save if not logged in (or save to local storage? for now just return)
+
         try {
             await addDoc(collection(db, 'history'), {
                 ...item,
+                userId,
                 date: new Date().toISOString(),
                 timestamp: Timestamp.now(),
             });
@@ -61,10 +73,6 @@ export const useHistory = () => {
     };
 
     const clearHistory = async () => {
-        // Note: Deleting collections from client is not recommended/easy in Firestore.
-        // We would typically delete documents one by one or use a Cloud Function.
-        // For this demo, we'll just clear the local state visually or implement a batch delete if needed.
-        // Keeping it simple: Log a warning that server-side clear is needed.
         console.warn("Clear history not fully implemented for Firestore (requires batch delete)");
         setHistory([]);
     };

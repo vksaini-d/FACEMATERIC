@@ -5,9 +5,20 @@ import { Trash2, Calendar, Activity } from 'lucide-react';
 interface HistoryPanelProps {
     history: HistoryItem[];
     onClear: () => void;
+    isAuthenticated?: boolean;
 }
 
-export default function HistoryPanel({ history, onClear }: HistoryPanelProps) {
+export default function HistoryPanel({ history, onClear, isAuthenticated = false }: HistoryPanelProps) {
+    if (!isAuthenticated) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                <Activity className="w-12 h-12 mb-4 opacity-20" />
+                <p className="mb-2">Please sign in to view your history.</p>
+                <p className="text-xs text-gray-600">Your analysis results are saved securely in the cloud.</p>
+            </div>
+        );
+    }
+
     if (history.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center h-full text-gray-500">

@@ -13,11 +13,13 @@ import { calculateFaceShape, FaceShape } from "@/lib/analysis/faceShape";
 import { calculateGoldenRatio } from "@/lib/analysis/goldenRatio";
 import { Camera, Upload as UploadIcon, Ruler, History as HistoryIcon } from "lucide-react";
 import clsx from "clsx";
+import { useAuth } from "@/hooks/useAuth";
 import { AppMode } from "@/components/layout/Sidebar";
 
 export default function Home() {
+  const { user } = useAuth();
   const { results, isLoading, onVideoReady, detectImage, isInitialized } = useFaceDetection();
-  const { history, addToHistory, clearHistory } = useHistory();
+  const { history, addToHistory, clearHistory } = useHistory(user?.uid);
 
   const [mode, setMode] = useState<AppMode>('camera');
   const [manualData, setManualData] = useState<AnalysisData | null>(null);
@@ -129,7 +131,7 @@ export default function Home() {
             )}
             {mode === 'history' && (
               <div className="w-full h-full">
-                <HistoryPanel history={history} onClear={clearHistory} />
+                <HistoryPanel history={history} onClear={clearHistory} isAuthenticated={!!user} />
               </div>
             )}
             {mode === 'settings' && (
