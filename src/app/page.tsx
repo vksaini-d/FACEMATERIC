@@ -80,42 +80,42 @@ export default function Home() {
 
   return (
     <AppLayout currentMode={mode} onModeChange={setMode}>
-      <div className="h-full w-full grid grid-cols-1 lg:grid-cols-3 gap-0">
+      <div className="h-full w-full flex flex-col lg:grid lg:grid-cols-3 gap-0">
         {/* Center: Canvas/Camera/History */}
-        <div className="lg:col-span-2 relative border-r border-antigravity-border bg-black flex flex-col overflow-hidden">
+        <div className="lg:col-span-2 relative border-b lg:border-b-0 lg:border-r border-antigravity-border bg-black flex flex-col overflow-hidden min-h-[60vh] lg:min-h-0">
 
           {/* Mode Switcher (Visible only in capture modes) */}
           {(mode === 'camera' || mode === 'upload' || mode === 'manual') && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 flex bg-antigravity-black/80 backdrop-blur-md rounded-full p-1 border border-antigravity-border">
+            <div className="absolute top-2 sm:top-4 left-1/2 -translate-x-1/2 z-10 flex bg-antigravity-black/80 backdrop-blur-md rounded-full p-1 border border-antigravity-border shadow-lg">
               <button
                 onClick={() => setMode('camera')}
                 className={clsx(
-                  "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
+                  "flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all",
                   mode === 'camera' ? "bg-electric-blue text-white" : "text-gray-400 hover:text-white"
                 )}
               >
-                <Camera className="w-4 h-4" />
-                Camera
+                <Camera className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden xs:inline">Camera</span>
               </button>
               <button
                 onClick={() => setMode('upload')}
                 className={clsx(
-                  "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
+                  "flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all",
                   mode === 'upload' ? "bg-electric-blue text-white" : "text-gray-400 hover:text-white"
                 )}
               >
-                <UploadIcon className="w-4 h-4" />
-                Upload
+                <UploadIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden xs:inline">Upload</span>
               </button>
               <button
                 onClick={() => setMode('manual')}
                 className={clsx(
-                  "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all",
+                  "flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all",
                   mode === 'manual' ? "bg-electric-blue text-white" : "text-gray-400 hover:text-white"
                 )}
               >
-                <Ruler className="w-4 h-4" />
-                Manual
+                <Ruler className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden xs:inline">Manual</span>
               </button>
             </div>
           )}
@@ -146,9 +146,9 @@ export default function Home() {
               </div>
             )}
             {mode === 'settings' && (
-              <div className="flex flex-col items-center justify-center text-gray-500">
-                <SettingsIcon className="w-12 h-12 mb-4 opacity-50" />
-                <p>Settings coming soon...</p>
+              <div className="flex flex-col items-center justify-center text-gray-500 p-4">
+                <SettingsIcon className="w-10 h-10 sm:w-12 sm:h-12 mb-4 opacity-50" />
+                <p className="text-sm sm:text-base">Settings coming soon...</p>
               </div>
             )}
           </div>

@@ -3,7 +3,7 @@
 @theme {
   --color-background: #0a0a0a;
   --color-foreground: #ededed;
-  
+
   --color-antigravity-black: #0a0a0a;
   --color-antigravity-gray: #121212;
   --color-antigravity-border: #333333;
@@ -12,6 +12,8 @@
 
   --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
+
+  --breakpoint-xs: 475px;
 }
 
 :root {
@@ -30,13 +32,16 @@ body {
   width: 8px;
   height: 8px;
 }
+
 ::-webkit-scrollbar-track {
-  background: #0a0a0a; 
+  background: #0a0a0a;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #333; 
+  background: #333;
   border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: #555; 
+  background: #555;
 }

@@ -14,7 +14,7 @@ export default function AppLayout({ children, currentMode, onModeChange }: AppLa
             <Header />
             <div className="flex">
                 <Sidebar currentMode={currentMode} onModeChange={onModeChange} />
-                <main className="flex-1 h-[calc(100vh-64px)] overflow-hidden bg-antigravity-black relative">
+                <main className="flex-1 h-[calc(100vh-56px)] sm:h-[calc(100vh-64px)] overflow-hidden bg-antigravity-black relative">
                     {children}
                 </main>
             </div>

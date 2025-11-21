@@ -22,10 +22,10 @@ export default function AnalysisPanel({ data, onSave }: AnalysisPanelProps) {
     };
 
     return (
-        <div className="bg-antigravity-gray p-6 border-l border-antigravity-border h-full overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                    <span className="w-1 h-6 bg-electric-blue rounded-full"></span>
+        <div className="bg-antigravity-gray p-4 sm:p-6 border-t lg:border-t-0 lg:border-l border-antigravity-border h-full overflow-y-auto">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                    <span className="w-1 h-5 sm:h-6 bg-electric-blue rounded-full"></span>
                     Analysis Results
                 </h2>
                 {data && onSave && (
@@ -34,16 +34,16 @@ export default function AnalysisPanel({ data, onSave }: AnalysisPanelProps) {
                         className="p-2 rounded-full bg-electric-blue/10 text-electric-blue hover:bg-electric-blue/20 transition-colors"
                         title="Save to History"
                     >
-                        <Save className="w-5 h-5" />
+                        <Save className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                 )}
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
                 {/* Shape Card */}
-                <div className="p-5 rounded-xl bg-antigravity-black border border-antigravity-border group hover:border-electric-blue/50 transition-colors">
+                <div className="p-4 sm:p-5 rounded-xl bg-antigravity-black border border-antigravity-border group hover:border-electric-blue/50 transition-colors">
                     <p className="text-xs text-gray-500 uppercase font-mono mb-1">Face Shape</p>
-                    <h3 className="text-3xl font-bold text-white tracking-tight">
+                    <h3 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
                         {data ? data.shape : '--'}
                     </h3>
                     {data && (
@@ -54,10 +54,10 @@ export default function AnalysisPanel({ data, onSave }: AnalysisPanelProps) {
                 </div>
 
                 {/* Golden Ratio Card */}
-                <div className="p-5 rounded-xl bg-antigravity-black border border-antigravity-border group hover:border-electric-blue/50 transition-colors">
+                <div className="p-4 sm:p-5 rounded-xl bg-antigravity-black border border-antigravity-border group hover:border-electric-blue/50 transition-colors">
                     <p className="text-xs text-gray-500 uppercase font-mono mb-1">Symmetry Score</p>
                     <div className="flex items-end gap-2">
-                        <h3 className={clsx("text-4xl font-bold tracking-tight", data ? scoreColor(data.ratio.score) : "text-gray-600")}>
+                        <h3 className={clsx("text-3xl sm:text-4xl font-bold tracking-tight", data ? scoreColor(data.ratio.score) : "text-gray-600")}>
                             {data ? data.ratio.score : '0.0'}
                         </h3>
                         <span className="text-sm text-gray-500 mb-1.5">/ 100</span>
@@ -81,7 +81,7 @@ export default function AnalysisPanel({ data, onSave }: AnalysisPanelProps) {
 
                 {/* Recommendations */}
                 {data && (
-                    <div className="p-5 rounded-xl bg-antigravity-black border border-antigravity-border">
+                    <div className="p-4 sm:p-5 rounded-xl bg-antigravity-black border border-antigravity-border">
                         <p className="text-xs text-gray-500 uppercase font-mono mb-2">Styling Tips</p>
                         <p className="text-sm text-gray-300 leading-relaxed">
                             For <strong>{data.shape}</strong> faces, consider hairstyles that add volume to the top to balance the proportions.

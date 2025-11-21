@@ -19,7 +19,7 @@ const NAV_ITEMS: { icon: any; label: string; mode: AppMode }[] = [
 
 export default function Sidebar({ currentMode, onModeChange }: SidebarProps) {
     return (
-        <aside className="w-64 border-r border-antigravity-border bg-antigravity-gray h-[calc(100vh-64px)] hidden md:flex flex-col">
+        <aside className="w-64 border-r border-antigravity-border bg-antigravity-gray h-[calc(100vh-56px)] sm:h-[calc(100vh-64px)] hidden md:flex flex-col">
             <nav className="p-4 space-y-2">
                 {NAV_ITEMS.map((item) => (
                     <button
