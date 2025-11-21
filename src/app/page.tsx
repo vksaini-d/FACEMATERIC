@@ -56,14 +56,14 @@ export default function Home() {
     return analysisResult;
   }, [results]);
 
+  // Determine which data to show
+  const displayData = mode === 'manual' ? manualData : autoData;
+
   // Debug logging
   useEffect(() => {
     console.log('autoData changed:', autoData);
     console.log('displayData:', displayData);
   }, [autoData, displayData]);
-
-  // Determine which data to show
-  const displayData = mode === 'manual' ? manualData : autoData;
 
   const handleManualCalculate = (shape: FaceShape, ratioScore: number) => {
     setManualData({
