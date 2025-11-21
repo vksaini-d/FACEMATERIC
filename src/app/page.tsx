@@ -18,7 +18,7 @@ import { AppMode } from "@/components/layout/Sidebar";
 
 export default function Home() {
   const { user } = useAuth();
-  const { results, isLoading, onVideoReady, detectImage, isInitialized } = useFaceDetection();
+  const { results, isLoading, onVideoReady, detectImage, detectImageFromDataURL, isInitialized } = useFaceDetection();
   const { history, addToHistory, clearHistory } = useHistory(user?.uid);
 
   const [mode, setMode] = useState<AppMode>('camera');
@@ -28,6 +28,16 @@ export default function Home() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  const handleCameraCapture = async (imageSrc: string) => {
+    if (detectImageFromDataURL) {
+      try {
+        await detectImageFromDataURL(imageSrc);
+      } catch (error) {
+        console.error('Failed to analyze captured image:', error);
+      }
+    }
+  };
 
   // Auto-calculate from MediaPipe results
   const autoData = useMemo<AnalysisData | null>(() => {
@@ -116,6 +126,7 @@ export default function Home() {
                 onVideoReady={onVideoReady}
                 results={results}
                 isLoading={isLoading}
+                onCapture={handleCameraCapture}
               />
             )}
             {mode === 'upload' && (

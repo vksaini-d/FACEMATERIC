@@ -101,15 +101,46 @@ export const useFaceDetection = () => {
     }, [isInitialized]);
 
     const detectImage = useCallback(async (imageElement: HTMLImageElement) => {
-        if (!faceMeshRef.current || !isInitialized) return;
+        if (!faceMeshRef.current || !isInitialized) {
+            console.warn('MediaPipe not initialized yet');
+            return;
+        }
         setIsLoading(true);
         try {
             await faceMeshRef.current.send({ image: imageElement });
+            // Note: isLoading will be set to false by onResults callback
         } catch (error) {
             console.error('Error detecting image:', error);
+            setIsLoading(false); // Only set false on error
         }
-        setIsLoading(false);
     }, [isInitialized]);
 
-    return { results, isLoading, onVideoReady, detectImage, isInitialized };
+    const detectImageFromDataURL = useCallback(async (dataURL: string) => {
+        if (!faceMeshRef.current || !isInitialized) {
+            console.warn('MediaPipe not initialized yet');
+            return;
+        }
+
+        return new Promise<void>((resolve, reject) => {
+            const img = new Image();
+            img.onload = async () => {
+                setIsLoading(true);
+                try {
+                    await faceMeshRef.current!.send({ image: img });
+                    resolve();
+                } catch (error) {
+                    console.error('Error detecting image from data URL:', error);
+                    setIsLoading(false);
+                    reject(error);
+                }
+            };
+            img.onerror = () => {
+                console.error('Failed to load image from data URL');
+                reject(new Error('Failed to load image'));
+            };
+            img.src = dataURL;
+        });
+    }, [isInitialized]);
+
+    return { results, isLoading, onVideoReady, detectImage, detectImageFromDataURL, isInitialized };
 };
