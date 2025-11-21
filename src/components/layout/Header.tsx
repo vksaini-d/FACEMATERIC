@@ -1,13 +1,22 @@
 import React from 'react';
 import { Sparkles, LogIn, LogOut, User as UserIcon } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import MobileMenu from './MobileMenu';
+import { AppMode } from './Sidebar';
 
-export default function Header() {
+interface HeaderProps {
+    currentMode: AppMode;
+    onModeChange: (mode: AppMode) => void;
+}
+
+export default function Header({ currentMode, onModeChange }: HeaderProps) {
     const { user, signInWithGoogle, signOut } = useAuth();
 
     return (
         <header className="h-14 sm:h-16 border-b border-antigravity-border bg-antigravity-black px-3 sm:px-6 flex items-center justify-between sticky top-0 z-50 backdrop-blur-md bg-opacity-80">
             <div className="flex items-center gap-2 sm:gap-3">
+                <MobileMenu currentMode={currentMode} onModeChange={onModeChange} />
+
                 <div className="bg-electric-blue/10 p-1.5 sm:p-2 rounded-lg">
                     <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-electric-blue" />
                 </div>

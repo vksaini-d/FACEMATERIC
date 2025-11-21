@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import { FaceShape } from '@/lib/analysis/faceShape';
 import { GoldenRatioResult } from '@/lib/analysis/goldenRatio';
 import { Save } from 'lucide-react';
+import StylingTips from './StylingTips';
 
 export interface AnalysisData {
     shape: FaceShape;
@@ -79,13 +80,11 @@ export default function AnalysisPanel({ data, onSave }: AnalysisPanelProps) {
                     )}
                 </div>
 
-                {/* Recommendations */}
+                {/* Styling Recommendations */}
                 {data && (
                     <div className="p-4 sm:p-5 rounded-xl bg-antigravity-black border border-antigravity-border">
-                        <p className="text-xs text-gray-500 uppercase font-mono mb-2">Styling Tips</p>
-                        <p className="text-sm text-gray-300 leading-relaxed">
-                            For <strong>{data.shape}</strong> faces, consider hairstyles that add volume to the top to balance the proportions.
-                        </p>
+                        <p className="text-xs text-gray-500 uppercase font-mono mb-3">Styling Recommendations</p>
+                        <StylingTips shape={data.shape} />
                     </div>
                 )}
             </div>

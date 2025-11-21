@@ -41,15 +41,26 @@ export default function Home() {
 
   // Auto-calculate from MediaPipe results
   const autoData = useMemo<AnalysisData | null>(() => {
+    console.log('Computing autoData, results:', results);
     if (!results || !results.multiFaceLandmarks || results.multiFaceLandmarks.length === 0) {
+      console.log('No face landmarks detected');
       return null;
     }
     const landmarks = results.multiFaceLandmarks[0];
-    return {
+    console.log('Landmarks found:', landmarks.length, 'points');
+    const analysisResult = {
       shape: calculateFaceShape(landmarks),
       ratio: calculateGoldenRatio(landmarks),
     };
+    console.log('Analysis result:', analysisResult);
+    return analysisResult;
   }, [results]);
+
+  // Debug logging
+  useEffect(() => {
+    console.log('autoData changed:', autoData);
+    console.log('displayData:', displayData);
+  }, [autoData, displayData]);
 
   // Determine which data to show
   const displayData = mode === 'manual' ? manualData : autoData;
