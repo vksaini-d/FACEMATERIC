@@ -107,12 +107,23 @@ export const useFaceDetection = () => {
             return;
         }
         setIsLoading(true);
+
+        // Create a timeout promise
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Analysis timed out')), 5000);
+        });
+
         try {
-            await faceMeshRef.current.send({ image: imageElement });
+            // Race between detection and timeout
+            await Promise.race([
+                faceMeshRef.current.send({ image: imageElement }),
+                timeoutPromise
+            ]);
             // Note: isLoading will be set to false by onResults callback
         } catch (error) {
             console.error('Error detecting image:', error);
-            setIsLoading(false); // Only set false on error
+            setIsLoading(false); // Ensure loading stops on error
+            // Optionally set an error state here if you had one
         }
     }, [isInitialized]);
 

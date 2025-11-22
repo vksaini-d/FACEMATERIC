@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Upload, X, Sparkles } from 'lucide-react';
 import { Results } from '@/hooks/useFaceDetection';
 import FaceCanvas from './FaceCanvas';
@@ -16,8 +16,35 @@ interface UploadZoneProps {
 export default function UploadZone({ detectImage, results, isLoading, isInitialized, clearResults }: UploadZoneProps) {
     const [imageSrc, setImageSrc] = useState<string | null>(null);
     const imageRef = useRef<HTMLImageElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
     const [hasAnalyzed, setHasAnalyzed] = useState(false);
+
+    // Handle window resize / image resize to keep overlay synced
+    useEffect(() => {
+        if (!imageRef.current) return;
+
+        const updateDimensions = () => {
+            if (imageRef.current) {
+                setDimensions({
+                    width: imageRef.current.clientWidth,
+                    height: imageRef.current.clientHeight
+                });
+            }
+        };
+
+        const resizeObserver = new ResizeObserver(() => {
+            updateDimensions();
+        });
+
+        resizeObserver.observe(imageRef.current);
+        window.addEventListener('resize', updateDimensions);
+
+        return () => {
+            resizeObserver.disconnect();
+            window.removeEventListener('resize', updateDimensions);
+        };
+    }, [imageSrc]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -25,8 +52,8 @@ export default function UploadZone({ detectImage, results, isLoading, isInitiali
             const reader = new FileReader();
             reader.onload = (event) => {
                 setImageSrc(event.target?.result as string);
-                setHasAnalyzed(false); // Reset analysis state
-                clearResults(); // Clear previous analysis results
+                setHasAnalyzed(false);
+                clearResults();
             };
             reader.readAsDataURL(file);
         }
@@ -44,12 +71,12 @@ export default function UploadZone({ detectImage, results, isLoading, isInitiali
     const handleAnalyze = async () => {
         if (imageRef.current && isInitialized) {
             setHasAnalyzed(true);
-            // Small delay to ensure layout is stable
+            // Use a small timeout to allow UI to update, then detect
             setTimeout(async () => {
                 if (imageRef.current) {
                     await detectImage(imageRef.current);
                 }
-            }, 100);
+            }, 50);
         }
     };
 
@@ -80,25 +107,32 @@ export default function UploadZone({ detectImage, results, isLoading, isInitiali
                 </div>
             ) : (
                 <div className="relative w-full h-full flex flex-col items-center justify-center bg-black overflow-hidden">
-                    <div className="relative flex-1 w-full flex items-center justify-center p-4">
-                        <img
-                            ref={imageRef}
-                            src={imageSrc}
-                            alt="Uploaded"
-                            className="max-w-full max-h-full object-contain"
-                            onLoad={onImageLoad}
-                        />
+                    <div ref={containerRef} className="relative flex-1 w-full flex items-center justify-center p-4 overflow-hidden">
+                        {/* Image Container - prevents forcing upscaling if not needed, but ensures fit */}
+                        <div className="relative inline-block" style={{ maxWidth: '100%', maxHeight: '100%' }}>
+                            <img
+                                ref={imageRef}
+                                src={imageSrc}
+                                alt="Uploaded"
+                                className="max-w-full max-h-[80vh] object-contain block"
+                                onLoad={onImageLoad}
+                            />
 
-                        {hasAnalyzed && dimensions.width > 0 && (
-                            <div style={{ width: dimensions.width, height: dimensions.height }} className="absolute pointer-events-none">
-                                <FaceCanvas
-                                    results={results}
-                                    width={dimensions.width}
-                                    height={dimensions.height}
-                                    mirror={false}
-                                />
-                            </div>
-                        )}
+                            {/* Overlay Canvas - Positioned absolutely over the image */}
+                            {hasAnalyzed && dimensions.width > 0 && (
+                                <div
+                                    className="absolute top-0 left-0 pointer-events-none"
+                                    style={{ width: dimensions.width, height: dimensions.height }}
+                                >
+                                    <FaceCanvas
+                                        results={results}
+                                        width={dimensions.width}
+                                        height={dimensions.height}
+                                        mirror={false}
+                                    />
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Action Buttons */}
@@ -110,7 +144,7 @@ export default function UploadZone({ detectImage, results, isLoading, isInitiali
                                 className="flex items-center gap-2 px-6 py-3 sm:px-8 sm:py-4 bg-electric-blue rounded-full text-white font-bold hover:bg-electric-blue/80 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-electric-blue/50 border-2 border-white/20 text-sm sm:text-base"
                             >
                                 <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
-                                Analyze
+                                {isLoading ? 'Analyzing...' : 'Analyze'}
                             </button>
                         ) : (
                             <button
@@ -135,9 +169,12 @@ export default function UploadZone({ detectImage, results, isLoading, isInitiali
 
             {(isLoading || !isInitialized) && imageSrc && hasAnalyzed && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-20">
-                    <p className="text-electric-blue animate-pulse font-mono text-sm sm:text-base px-4 text-center">
-                        {!isInitialized ? 'Loading Model...' : 'Analyzing...'}
-                    </p>
+                    <div className="text-center">
+                        <div className="w-10 h-10 border-4 border-electric-blue border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                        <p className="text-electric-blue font-mono text-sm sm:text-base px-4">
+                            {!isInitialized ? 'Loading Model...' : 'Analyzing Facial Structure...'}
+                        </p>
+                    </div>
                 </div>
             )}
         </div>
