@@ -32,7 +32,9 @@ export default function Home() {
   const handleCameraCapture = async (imageSrc: string) => {
     if (detectImageFromDataURL) {
       try {
+        console.log('Capturing and analyzing image...');
         await detectImageFromDataURL(imageSrc);
+        console.log('Analysis request sent.');
       } catch (error) {
         console.error('Failed to analyze captured image:', error);
       }
@@ -41,29 +43,22 @@ export default function Home() {
 
   // Auto-calculate from MediaPipe results
   const autoData = useMemo<AnalysisData | null>(() => {
-    console.log('Computing autoData, results:', results);
     if (!results || !results.multiFaceLandmarks || results.multiFaceLandmarks.length === 0) {
-      console.log('No face landmarks detected');
       return null;
     }
     const landmarks = results.multiFaceLandmarks[0];
-    console.log('Landmarks found:', landmarks.length, 'points');
-    const analysisResult = {
+
+    // Core Analysis Logic
+    return {
       shape: calculateFaceShape(landmarks),
       ratio: calculateGoldenRatio(landmarks),
     };
-    console.log('Analysis result:', analysisResult);
-    return analysisResult;
   }, [results]);
 
   // Determine which data to show
   const displayData = mode === 'manual' ? manualData : autoData;
 
-  // Debug logging
-  useEffect(() => {
-    console.log('autoData changed:', autoData);
-    console.log('displayData:', displayData);
-  }, [autoData, displayData]);
+
 
   const handleManualCalculate = (shape: FaceShape, ratioScore: number) => {
     setManualData({

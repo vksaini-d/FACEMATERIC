@@ -24,8 +24,8 @@ type FaceMesh = {
 export const useFaceDetection = () => {
     const [results, setResults] = useState<Results | null>(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const faceMeshRef = useRef<FaceMesh | null>(null);
-    const animationFrameRef = useRef<number | null>(null);
     const [isInitialized, setIsInitialized] = useState(false);
 
     useEffect(() => {
@@ -34,40 +34,45 @@ export const useFaceDetection = () => {
 
         const loadMediaPipe = async () => {
             try {
+                console.log('Loading MediaPipe FaceMesh...');
                 // Dynamically import MediaPipe
                 const FaceMeshModule = await import('@mediapipe/face_mesh');
                 // @ts-ignore
                 const FaceMeshConstructor = FaceMeshModule.FaceMesh || FaceMeshModule.default?.FaceMesh || window.FaceMesh;
 
                 if (!FaceMeshConstructor) {
-                    console.error('FaceMesh constructor not found');
-                    setIsLoading(false);
-                    return;
+                    throw new Error('FaceMesh constructor not found');
                 }
 
                 const faceMesh = new FaceMeshConstructor({
                     locateFile: (file: string) => {
-                        return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/${file}`;
+                        // Use the most reliable CDN URL for the binary assets
+                        return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
                     },
                 });
 
                 faceMesh.setOptions({
                     maxNumFaces: 1,
                     refineLandmarks: true,
-                    minDetectionConfidence: 0.3, // Lowered for better detection
-                    minTrackingConfidence: 0.3,
+                    minDetectionConfidence: 0.5,
+                    minTrackingConfidence: 0.5,
                 });
 
                 faceMesh.onResults((res: Results) => {
-                    console.log('FaceMesh Results:', res.multiFaceLandmarks?.length);
+                    console.log('FaceMesh Results Received:', res.multiFaceLandmarks?.length || 0, 'faces detected');
                     setResults(res);
                     setIsLoading(false);
                 });
 
+                await faceMesh.initialize(); // Ensure initialization if the method exists (it might not on all versions, but good to check docs, usually implicit)
+
                 faceMeshRef.current = faceMesh;
                 setIsInitialized(true);
-            } catch (error) {
-                console.error('Failed to load MediaPipe:', error);
+                setIsLoading(false);
+                console.log('MediaPipe FaceMesh Initialized');
+            } catch (err: any) {
+                console.error('Failed to load MediaPipe:', err);
+                setError(err.message || 'Failed to load face detection model');
                 setIsLoading(false);
             }
         };
@@ -75,9 +80,6 @@ export const useFaceDetection = () => {
         loadMediaPipe();
 
         return () => {
-            if (animationFrameRef.current) {
-                cancelAnimationFrame(animationFrameRef.current);
-            }
             if (faceMeshRef.current) {
                 faceMeshRef.current.close();
             }
@@ -88,14 +90,14 @@ export const useFaceDetection = () => {
         if (!faceMeshRef.current || !isInitialized) return;
 
         const sendFrame = async () => {
-            if (faceMeshRef.current && videoElement && videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
+            if (faceMeshRef.current && videoElement && videoElement.readyState >= 2) { // HAVE_CURRENT_DATA
                 try {
                     await faceMeshRef.current.send({ image: videoElement });
                 } catch (error) {
                     console.error('Error sending frame:', error);
                 }
             }
-            animationFrameRef.current = requestAnimationFrame(sendFrame);
+            requestAnimationFrame(sendFrame);
         };
 
         sendFrame();
@@ -107,23 +109,20 @@ export const useFaceDetection = () => {
             return;
         }
         setIsLoading(true);
-
-        // Create a timeout promise
-        const timeoutPromise = new Promise((_, reject) => {
-            setTimeout(() => reject(new Error('Analysis timed out')), 5000);
-        });
+        setError(null);
 
         try {
-            // Race between detection and timeout
-            await Promise.race([
-                faceMeshRef.current.send({ image: imageElement }),
-                timeoutPromise
-            ]);
-            // Note: isLoading will be set to false by onResults callback
-        } catch (error) {
+            // Add a timeout to prevent hanging
+            const detectionPromise = faceMeshRef.current.send({ image: imageElement });
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Detection timed out')), 10000)
+            );
+
+            await Promise.race([detectionPromise, timeoutPromise]);
+        } catch (error: any) {
             console.error('Error detecting image:', error);
-            setIsLoading(false); // Ensure loading stops on error
-            // Optionally set an error state here if you had one
+            setError(error.message || 'Error detecting faces');
+            setIsLoading(false);
         }
     }, [isInitialized]);
 
@@ -132,31 +131,43 @@ export const useFaceDetection = () => {
             console.warn('MediaPipe not initialized yet');
             return;
         }
+        setIsLoading(true);
+        setError(null);
 
         return new Promise<void>((resolve, reject) => {
             const img = new Image();
+            img.crossOrigin = 'anonymous'; // Important for some CDNs/sources
             img.onload = async () => {
-                setIsLoading(true);
                 try {
-                    await faceMeshRef.current!.send({ image: img });
+                    await detectImage(img);
                     resolve();
                 } catch (error) {
-                    console.error('Error detecting image from data URL:', error);
-                    setIsLoading(false);
                     reject(error);
                 }
             };
-            img.onerror = () => {
-                console.error('Failed to load image from data URL');
-                reject(new Error('Failed to load image'));
+            img.onerror = (err) => {
+                console.error('Failed to load image from Data URL');
+                setError('Failed to process captured image');
+                setIsLoading(false);
+                reject(err);
             };
             img.src = dataURL;
         });
-    }, [isInitialized]);
+    }, [isInitialized, detectImage]);
 
     const clearResults = useCallback(() => {
         setResults(null);
+        setError(null);
     }, []);
 
-    return { results, isLoading, onVideoReady, detectImage, detectImageFromDataURL, isInitialized, clearResults };
+    return {
+        results,
+        isLoading,
+        error,
+        onVideoReady,
+        detectImage,
+        detectImageFromDataURL,
+        isInitialized,
+        clearResults
+    };
 };
