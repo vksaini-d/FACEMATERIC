@@ -10,9 +10,10 @@ interface UploadZoneProps {
     results: Results | null;
     isLoading: boolean;
     isInitialized: boolean;
+    clearResults: () => void;
 }
 
-export default function UploadZone({ detectImage, results, isLoading, isInitialized }: UploadZoneProps) {
+export default function UploadZone({ detectImage, results, isLoading, isInitialized, clearResults }: UploadZoneProps) {
     const [imageSrc, setImageSrc] = useState<string | null>(null);
     const imageRef = useRef<HTMLImageElement>(null);
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -25,6 +26,7 @@ export default function UploadZone({ detectImage, results, isLoading, isInitiali
             reader.onload = (event) => {
                 setImageSrc(event.target?.result as string);
                 setHasAnalyzed(false); // Reset analysis state
+                clearResults(); // Clear previous analysis results
             };
             reader.readAsDataURL(file);
         }
@@ -55,6 +57,7 @@ export default function UploadZone({ detectImage, results, isLoading, isInitiali
         setImageSrc(null);
         setDimensions({ width: 0, height: 0 });
         setHasAnalyzed(false);
+        clearResults();
     };
 
     return (

@@ -18,7 +18,7 @@ import { AppMode } from "@/components/layout/Sidebar";
 
 export default function Home() {
   const { user } = useAuth();
-  const { results, isLoading, onVideoReady, detectImage, detectImageFromDataURL, isInitialized } = useFaceDetection();
+  const { results, isLoading, onVideoReady, detectImage, detectImageFromDataURL, isInitialized, clearResults } = useFaceDetection();
   const { history, addToHistory, clearHistory } = useHistory(user?.uid);
 
   const [mode, setMode] = useState<AppMode>('camera');
@@ -146,6 +146,7 @@ export default function Home() {
                 results={results}
                 isLoading={isLoading}
                 isInitialized={isInitialized}
+                clearResults={clearResults}
               />
             )}
             {mode === 'manual' && (

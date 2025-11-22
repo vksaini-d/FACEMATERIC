@@ -54,11 +54,12 @@ export const useFaceDetection = () => {
                 faceMesh.setOptions({
                     maxNumFaces: 1,
                     refineLandmarks: true,
-                    minDetectionConfidence: 0.5,
-                    minTrackingConfidence: 0.5,
+                    minDetectionConfidence: 0.3, // Lowered for better detection
+                    minTrackingConfidence: 0.3,
                 });
 
                 faceMesh.onResults((res: Results) => {
+                    console.log('FaceMesh Results:', res.multiFaceLandmarks?.length);
                     setResults(res);
                     setIsLoading(false);
                 });
@@ -142,5 +143,9 @@ export const useFaceDetection = () => {
         });
     }, [isInitialized]);
 
-    return { results, isLoading, onVideoReady, detectImage, detectImageFromDataURL, isInitialized };
+    const clearResults = useCallback(() => {
+        setResults(null);
+    }, []);
+
+    return { results, isLoading, onVideoReady, detectImage, detectImageFromDataURL, isInitialized, clearResults };
 };

@@ -119,8 +119,9 @@ export default function CameraFeed({ onVideoReady, results, isLoading, onCapture
                     >
                         <Camera className="w-6 h-6" />
                     </button>
-                    <div className="bg-black/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 text-xs text-white/70 font-mono">
-                        Face Tracking Active
+                    <div className="bg-black/50 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 text-xs text-white/70 font-mono flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${results?.multiFaceLandmarks?.length ? 'bg-green-500' : 'bg-red-500'}`} />
+                        {results?.multiFaceLandmarks?.length ? 'Face Detected' : 'Searching...'}
                     </div>
                 </div>
             )}
