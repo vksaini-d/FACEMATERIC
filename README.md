@@ -46,7 +46,7 @@ Whether you're interested in aesthetics, styling, or just curious about your fac
     - Create a project at [Firebase Console](https://console.firebase.google.com/).
     - Enable **Authentication** (Google Provider).
     - Enable **Firestore Database**.
-    - Update `src/lib/firebase.ts` with your config keys if they differ.
+    - Update `src/lib/firebase.ts` with your config keys .
 
 4. **Run the development server**
 
@@ -65,40 +65,6 @@ Deploying FaceMetric to Vercel is simple and recommended for the best performanc
 * A [GitHub](https://github.com) account.
 - A [Vercel](https://vercel.com) account.
 - A [Firebase](https://firebase.google.com) project.
-
-### Steps
-
-1. **Push to GitHub**
-    Ensure your latest code is pushed to your GitHub repository.
-
-    ```bash
-    git add .
-    git commit -m "Ready for deployment"
-    git push origin master
-    ```
-
-2. **Import to Vercel**
-    - Log in to your Vercel Dashboard.
-    - Click **"Add New..."** -> **"Project"**.
-    - Select your `FACEMATERIC` repository.
-
-3. **Configure Project**
-    - **Framework Preset**: Next.js (Auto-detected).
-    - **Root Directory**: `./` (Default).
-    - **Environment Variables**: You typically don't need to set build-time env vars for this client-side Firebase setup, but for security, it's best practice to move Firebase config to `.env.local` and add them here.
-        - *If you moved keys to env vars, add them here (e.g., `NEXT_PUBLIC_FIREBASE_API_KEY`).*
-
-4. **Deploy**
-    - Click **"Deploy"**.
-    - Wait for the build to complete (approx. 1-2 mins).
-
-5. **Finalize Firebase Auth**
-    - Once deployed, copy your new Vercel domain (e.g., `facemetric.vercel.app`).
-    - Go to **Firebase Console** -> **Authentication** -> **Settings** -> **Authorized Domains**.
-    - **Add Domain**: Paste your Vercel domain here. This is crucial for Google Sign-In to work.
-
-6. **Done!**
-    Your app is now live globally!
 
 ## 📄 License
 
